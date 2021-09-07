@@ -2,6 +2,7 @@ package com.example.listadecompras
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.Image
 import androidx.appcompat.app.AppCompatActivity
