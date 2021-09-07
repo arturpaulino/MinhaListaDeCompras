@@ -12,6 +12,8 @@ import android.widget.ListView
 import com.example.listadecompras.databinding.ActivityCadastroBinding
 import com.example.listadecompras.databinding.ActivityMainBinding
 import com.example.listadecompras.databinding.ListViewItemBinding
+import java.text.NumberFormat
+import java.util.*
 
 //import kotlinx.android.synthetic.main.activity_main.*
 
@@ -51,5 +53,12 @@ class MainActivity : AppCompatActivity() {
         val adapter = binding.listViewProdutos.adapter as ProdutoAdapter
         adapter.clear()
         adapter.addAll(produtosGlobal)
+
+        val soma = produtosGlobal.sumByDouble { it.valor * it.quantidade }
+
+        val f = NumberFormat.getCurrencyInstance(Locale("pt", "br"))
+        binding.txtTotal.text = "TOTAL: ${ f.format(soma)}"
+
+
     }
 }
