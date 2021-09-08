@@ -12,6 +12,11 @@ import android.widget.ListView
 import com.example.listadecompras.databinding.ActivityCadastroBinding
 import com.example.listadecompras.databinding.ActivityMainBinding
 import com.example.listadecompras.databinding.ListViewItemBinding
+import org.jetbrains.anko.db.delete
+import org.jetbrains.anko.db.parseList
+import org.jetbrains.anko.db.rowParser
+import org.jetbrains.anko.db.select
+import org.jetbrains.anko.toast
 import java.text.NumberFormat
 import java.util.*
 
@@ -40,6 +45,10 @@ class MainActivity : AppCompatActivity() {
             //removendo o item clicado da lista
             produtosAdapter.remove(item)
 
+            //deletando do banco de dados
+            deletarProduto( item?.id!!)
+            toast("item deletado com sucesso")
+
             true
         }
 
@@ -48,16 +57,50 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    fun deletarProduto(idProduto:Int) {
+        database.use {
+            delete("produtos", "id = {id}", "id" to idProduto)
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         val adapter = binding.listViewProdutos.adapter as ProdutoAdapter
-        adapter.clear()
-        adapter.addAll(produtosGlobal)
+        database.use{
 
-        val soma = produtosGlobal.sumByDouble { it.valor * it.quantidade }
+            select("produtos").exec {
 
-        val f = NumberFormat.getCurrencyInstance(Locale("pt", "br"))
-        binding.txtTotal.text = "TOTAL: ${ f.format(soma)}"
+                val parser = rowParser {
+
+                        id: Int, nome: String,
+                        quantidade: Int,
+                        valor:Double,
+                        foto:ByteArray? ->
+                    //Colunas do banco de dados
+
+
+                    //Montagem do objeto Produto com as colunas do banco
+                    Produto(id, nome, quantidade, valor, foto?.toBitmap() )
+                }
+
+
+                var listaProdutos = parseList(parser)
+
+
+                adapter.clear()
+                adapter.addAll(listaProdutos)
+
+
+                val soma = listaProdutos.sumByDouble { it.valor * it.quantidade }
+
+                val f = NumberFormat.getCurrencyInstance(Locale("pt", "br"))
+               binding.txtTotal.text = "TOTAL: ${ f.format(soma)}"
+
+            }
+
+        }
+
+
 
 
     }
